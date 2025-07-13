@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/logo.png" alt="RapidApiCase Logo" width="300" height="100" />
+  <img src="RAPIDAPIIMAGES/logo.jpg" alt="RapidApiCase Logo" width="300" height="200" />
 </p>
 
 # 🏨 RapidApiCase (Booking.com Hotel Search & Details App)
@@ -76,27 +76,27 @@ This project is a modern web application built with **ASP.NET Core MVC**, levera
 ## 📸 Application Screenshots
 
 ### 🏠 Homepage with Hotel Search Form
-| ![Homepage](images/homepage.png) |
+| ![Homepage](RAPIDAPIIMAGES/1.png) |
 |:--------------------------------:|
 | The homepage features a clean search form for city, dates, and group size. |
 
 ### 🔍 Hotel Search Results (Hotel Cards)
-| ![Search Results](images/search-results.png) |
+| ![Search Results](RAPIDAPIIMAGES/2.png) |
 |:--------------------------------------------:|
 | Hotel cards display key info with a modern, responsive design. |
 
 ### 🏨 Hotel Details Main View
-| ![Hotel Details](images/hotel-details.png) |
+| ![Hotel Details](RAPIDAPIIMAGES/3.png) |
 |:------------------------------------------:|
 | Shows hotel name, rating, address, description, and amenities. |
 
 ### 🛏️ Room Images
-| ![Room Images](images/room-images.png) |
+| ![Room Images](RAPIDAPIIMAGES/4.png) |
 |:--------------------------------------:|
 | Displays room details with photos, prices, and descriptions. |
 
 ### 📍 Hotel Location
-| ![Hotel Location](images/hotel-location.png) |
+| ![Hotel Location](RAPIDAPIIMAGES/5.png) |
 |:--------------------------------------------:|
 | Interactive map powered by OpenStreetMap and Leaflet.js. |
 
