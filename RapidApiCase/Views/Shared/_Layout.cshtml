@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+@await Component.InvokeAsync("_HeadComponentPartial")
+<body class="main-layout">
+    <style>
+        body.main-layout {
+            background: linear-gradient(135deg, #e3f0ff 0%, #b6d0f7 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+
+        .loader_bg {
+            background: rgba(30, 64, 175, 0.08);
+        }
+
+        .loader img {
+            border-radius: 50%;
+            border: 4px solid #3b82f6;
+            box-shadow: 0 0 24px 0 #60a5fa;
+        }
+
+        header, .navbar, .main-header, .footer, .main-footer {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff !important;
+            box-shadow: 0 4px 24px 0 rgba(59, 130, 246, 0.10);
+        }
+
+            .navbar a, .main-header a, .footer a, .main-footer a {
+                color: #e0e7ef !important;
+                transition: color 0.2s;
+            }
+
+                .navbar a:hover, .main-header a:hover, .footer a:hover, .main-footer a:hover {
+                    color: #fff !important;
+                    text-shadow: 0 2px 8px #3b82f6;
+                }
+
+        .btn, .book_btn, .btn-outline-primary {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff !important;
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 2px 8px 0 #60a5fa33;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+            .btn:hover, .book_btn:hover, .btn-outline-primary:hover {
+                background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+                box-shadow: 0 4px 16px 0 #2563eb44;
+                color: #fff !important;
+            }
+
+        .price-badge, .review-badge, .badge-primary, .badge-danger, .badge-warning, .badge-success, .badge-secondary {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%) !important;
+            color: #fff !important;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px 0 #60a5fa33;
+            border: none;
+        }
+
+        .hotel-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 6px 24px 0 #60a5fa22;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+            .hotel-card:hover {
+                transform: translateY(-8px) scale(1.03);
+                box-shadow: 0 12px 32px 0 #2563eb33;
+            }
+    </style>
+<!-- loader  -->
+<div class="loader_bg">
+    <div class="loader"><img src="~/keto-1.0.0/keto-1.0.0/images/loading.gif" alt="#"/></div>
+</div>
+   
+<!-- end loader -->
+@await Component.InvokeAsync("_HeaderComponentPartial")
+
+<main role="main">
+    @RenderBody()
+</main>
+
+@await Component.InvokeAsync("_FooterComponentPartial")
+
+
+@await Component.InvokeAsync("_ScriptsComponentPartial")
+</body>
+</html>

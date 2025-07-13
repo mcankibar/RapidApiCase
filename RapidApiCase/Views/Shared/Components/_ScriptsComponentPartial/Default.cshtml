@@ -1,0 +1,44 @@
+<!-- Javascript files-->
+<script src="~/keto-1.0.0/keto-1.0.0/js/jquery.min.js"></script>
+<script src="~/keto-1.0.0/keto-1.0.0/js/bootstrap.bundle.min.js"></script>
+<script src="~/keto-1.0.0/keto-1.0.0/js/jquery-3.0.0.min.js"></script>
+<!-- sidebar -->
+<script src="~/keto-1.0.0/keto-1.0.0/js/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="~/keto-1.0.0/keto-1.0.0/js/custom.js"></script>
+
+<script>
+    // Smooth scrolling for navbar links
+    $(document).ready(function() {
+        // Hide loader after page loads
+        setTimeout(function() {
+            $('.loader_bg').fadeOut();
+        }, 3000);
+        
+        // Smooth scroll for navigation links
+        $('.nav-link').on('click', function(e) {
+            var target = $(this).attr('href');
+            if (target.startsWith('#')) {
+                e.preventDefault();
+                var targetSection = $(target);
+                if (targetSection.length) {
+                    $('html, body').animate({
+                        scrollTop: targetSection.offset().top - 80
+                    }, 800);
+                }
+            }
+        });
+        
+        // Update active nav item on scroll
+        $(window).scroll(function() {
+            var scrollPos = $(document).scrollTop();
+            $('.nav-link').each(function() {
+                var currLink = $(this);
+                var refElement = $(currLink.attr("href"));
+                if (refElement.length && refElement.position().top <= scrollPos + 100 && refElement.position().top + refElement.height() > scrollPos + 100) {
+                    $('.nav-link').removeClass("active");
+                    currLink.addClass("active");
+                }
+            });
+        });
+    });
+</script>

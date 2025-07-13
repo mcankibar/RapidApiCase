@@ -1,0 +1,819 @@
+﻿@model RapidApiCase.Models.HotelDetailViewModel
+@using System.Globalization;
+
+@{
+    ViewData["Title"] = @Model.Name;
+}
+
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+    /* General Settings and Color Palette */
+    :root {
+        --primary-color: #007bff; /* Blue - Links, buttons, accents */
+        --secondary-color: #6c757d; /* Grey - Secondary text, borders */
+        --accent-color: #28a745; /* Green - Success, confirmation */
+        --danger-color: #dc3545; /* Red - Prices, warnings */
+        --light-bg: #f8f9fa; /* Light Grey Background */
+        --white-bg: #fff; /* White Background */
+        --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08); /* Light shadow */
+        --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1); /* Medium shadow */
+        --border-color: #e9ecef; /* Border color */
+        --info-color: #17a2b8; /* Cyan for information */
+        --star-color: #ffc107; /* Star color (Gold yellow) */
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: var(--light-bg);
+    }
+
+    /* Base Container */
+    .hotel-detail-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: var(--white-bg);
+        box-shadow: var(--shadow-medium);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* Header Section */
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 5px;
+        font-size: 2.5em;
+        text-align: center;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Hotel Address and Rating Information */
+    .address-info {
+        color: var(--secondary-color);
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 1.1em;
+    }
+
+        .address-info i {
+            color: var(--primary-color);
+            margin-right: 5px;
+        }
+
+    .rating-section { /* General rating section */
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .stars {
+        display: inline-block;
+        font-size: 1.5em; /* Star size */
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+        .stars .fa-star, .stars .fa-star-half-alt {
+            color: var(--star-color); /* Color of filled stars */
+        }
+
+            .stars .fa-star.empty { /* Style for empty stars */
+                color: var(--secondary-color); /* Or a lighter grey */
+                opacity: 0.5;
+            }
+
+    .rating-text {
+        font-weight: bold;
+        color: var(--accent-color);
+        font-size: 1.2em;
+        vertical-align: middle;
+    }
+
+        .rating-text small {
+            color: var(--secondary-color);
+            font-weight: normal;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
+    /* General Section Styles */
+    section {
+        margin-bottom: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+
+        section h3 {
+            color: #34495e;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 10px;
+            font-size: 1.8em;
+            font-weight: 600;
+            display: block;
+        }
+
+    /* Hotel Logo/First Photo */
+    .hotel-logo-wrapper {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .hotel-logo {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        box-shadow: var(--shadow-medium);
+        border: 4px solid var(--primary-color);
+        transition: transform 0.3s ease;
+    }
+
+        .hotel-logo:hover {
+            transform: scale(1.05);
+        }
+
+    /* Hotel Description */
+    .description p {
+        font-size: 1.05em;
+        color: #555;
+        line-height: 1.8;
+        background-color: var(--light-bg);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    /* Hotel General Photo Gallery */
+    .photo-gallery {
+        margin-bottom: 30px;
+        background-color: var(--light-bg);
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: var(--shadow-light);
+        text-align: center;
+    }
+
+        .photo-gallery .swiper-container {
+            width: 100%;
+            max-width: 450px;
+            height: 280px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+
+    .swiper-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        margin: auto;
+        background-color: #f0f0f0;
+        border-radius: 4px;
+    }
+
+    .photo-gallery .swiper-button-next,
+    .photo-gallery .swiper-button-prev {
+        color: var(--primary-color);
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-light);
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+        .photo-gallery .swiper-button-next:hover,
+        .photo-gallery .swiper-button-prev:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+    .photo-gallery .swiper-pagination-bullet-active {
+        background: var(--primary-color);
+    }
+
+    /* Hotel Amenities */
+    .amenities ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .amenities li {
+        background-color: var(--white-bg);
+        border: 1px solid var(--border-color);
+        padding: 12px 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        font-size: 1em;
+        color: #495057;
+        box-shadow: var(--shadow-light);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .amenities li:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .amenities li i {
+            margin-right: 12px;
+            color: var(--accent-color);
+            font-size: 1.3em;
+        }
+
+    /* Spoken Languages */
+    .languages ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .languages li {
+        background-color: var(--info-color);
+        color: #fff;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.95em;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        box-shadow: var(--shadow-light);
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+        .languages li:hover {
+            background-color: #138496; /* A slightly darker info-color */
+            transform: translateY(-2px);
+        }
+
+        .languages li i {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+    /* Rooms Section */
+    .room {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        padding: 25px;
+        background-color: var(--white-bg);
+        box-shadow: var(--shadow-light);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .room:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .room h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.6em;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .room p {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+    .room-photos {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+        margin-bottom: 20px;
+    }
+
+        .room-photos img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-light);
+            transition: transform 0.2s ease;
+        }
+
+            .room-photos img:hover {
+                transform: scale(1.03);
+            }
+
+    .room-details ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 10px;
+    }
+
+    .room-details li {
+        margin-bottom: 8px;
+        color: #555;
+        font-size: 1em;
+        display: flex;
+        align-items: flex-start;
+    }
+
+        .room-details li strong {
+            color: #333;
+            margin-right: 5px;
+        }
+
+        .room-details li i {
+            margin-right: 8px;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+    .room-price {
+        font-size: 2em;
+        font-weight: bold;
+        color: var(--danger-color);
+        margin-top: 20px;
+        text-align: right;
+        padding-top: 10px;
+        border-top: 1px solid var(--border-color);
+    }
+
+        .room-price small {
+            font-size: 0.6em;
+            color: var(--secondary-color);
+            font-weight: normal;
+        }
+
+    /* Map */
+    #map {
+        border-radius: 10px;
+        box-shadow: var(--shadow-medium);
+        height: 450px !important;
+        margin-bottom: 20px;
+    }
+    .detail-badge {
+        position: absolute;
+        top: 20px; /* Adjusted from 10px to avoid overlap with address */
+        padding: 8px 15px;
+        font-weight: bold;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        z-index: 10; /* Ensure badges are on top */
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .detail-discount-badge {
+        left: 20px;
+        background-color: var(--danger-color); /* Red */
+        color: #fff;
+    }
+
+    .detail-preferred-plus-badge {
+        left: 140px; /* Position next to discount or as first if no discount */
+        background-color: #ffc107; /* Yellow/Amber */
+        color: #333; /* Darker text for readability */
+    }
+
+    .detail-preferred-badge {
+        left: 140px; /* Position next to discount or as first if no discount */
+        background-color: #6c757d; /* Grey */
+        color: #fff;
+    }
+
+</style>
+
+<div class="hotel-detail-container">
+    <h1>@Model.Name</h1>
+
+    @* Badges for Discount, Preferred+, Preferred *@
+    @{
+        int currentLeftPosition = 20; // Starting left position for the first badge
+
+        if (@ViewBag.discounted)
+        {
+            <span class="detail-badge detail-discount-badge" style="left: @(currentLeftPosition)px;">Discount!</span>
+            currentLeftPosition += 120; // Adjust for next badge
+        }
+
+        if (@ViewBag.prefferedPlus)
+        {
+            <span class="detail-badge detail-preferred-plus-badge" style="left: @(currentLeftPosition)px;">Preferred+</span>
+            currentLeftPosition += 120; // Adjust for next badge
+        }
+        else if (@ViewBag.preffered)
+        {
+            <span class="detail-badge detail-preferred-badge" style="left: @(currentLeftPosition)px;">Preferred</span>
+            currentLeftPosition += 100; // Adjust for next badge
+        }
+    }
+
+
+    @* Hotel logo/first photo displayed centrally and circular *@
+    @if (Model.PhotoUrls != null && Model.PhotoUrls.Any())
+    {
+        <div class="hotel-logo-wrapper">
+            <img src="@Model.PhotoUrls.First()" alt="Hotel Logo" class="hotel-logo" />
+        </div>
+    }
+
+    <div class="address-info">
+        <p><i class="fas fa-map-marker-alt"></i> @Model.Address, @Model.City, @Model.CountryCode</p>
+    </div>
+
+    @* Review Score and Star Rating Display *@
+    <div class="rating-section">
+        @if (Model.ReviewScore.HasValue)
+        {
+            <div class="stars">
+                @{
+                    // Scale the score to a 5-star system (since it comes as 10-point scale)
+                    double scaledScore = (double)Model.ReviewScore.Value / 2;
+                    int fullStars = (int)Math.Floor(scaledScore);
+                    bool hasHalfStar = (scaledScore - fullStars) >= 0.5;
+                    int emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+                    for (int i = 0; i < fullStars; i++)
+                    {
+                        <i class="fas fa-star"></i>
+                        // Filled star
+                    }
+                    if (hasHalfStar)
+                    {
+                        <i class="fas fa-star-half-alt"></i>
+                        // Half star
+                    }
+                    for (int i = 0; i < emptyStars; i++)
+                    {
+                        <i class="far fa-star empty"></i>
+                        // Empty (outlined) star
+                    }
+                }
+            </div>
+            <span class="rating-text">
+                @Model.ReviewScore?.ToString("0.0") / 10
+                <small>(@Model.ReviewCount reviews) - @Model.ReviewScoreWord</small>
+            </span>
+        }
+        else
+        {
+            <p class="rating-text"><small>Review score not available.</small></p>
+        }
+        @* Display accessibility label if available *@
+        
+            <p class="text-muted" style="font-size:0.9rem; margin-top: 10px;">
+                <i class="fas fa-wheelchair" style="color: var(--primary-color);"></i> @ViewBag.access
+            </p>
+        
+    </div>
+    
+   
+    @* Spoken Languages Section *@
+    @if (Model.SpokenLanguages != null && Model.SpokenLanguages.Any())
+    {
+        <section class="languages">
+            <h3>Languages Spoken</h3>
+            <ul>
+                @foreach (var lang in Model.SpokenLanguages)
+                {
+                    <li><i class="fas fa-comments"></i> @lang</li>
+                }
+            </ul>
+        </section>
+    }
+
+    
+
+    <section class="amenities">
+        <h3>Hotel Amenities & Features</h3>
+        @if (Model.Amenities != null && Model.Amenities.Any())
+        {
+            <ul>
+                @foreach (var amenity in Model.Amenities)
+                {
+                    <li>
+                        @{
+                            string iconClass = "fas fa-question-circle"; // Default: question mark for unknown or unmatched amenity
+                            string lowerAmenity = amenity.ToLower(CultureInfo.InvariantCulture);
+
+                            if (lowerAmenity.Contains("pool") || lowerAmenity.Contains("swimming"))
+                            {
+                                iconClass = "fas fa-swimming-pool";
+                            }
+                            else if (lowerAmenity.Contains("non-smoking"))
+                            {
+                                iconClass = "fas fa-smoking-ban";
+                            }
+                            else if (lowerAmenity.Contains("fitness center") || lowerAmenity.Contains("gym") || lowerAmenity.Contains("workout"))
+                            {
+                                iconClass = "fas fa-dumbbell";
+                            }
+                            else if (lowerAmenity.Contains("disabled access") || lowerAmenity.Contains("accessible"))
+                            {
+                                iconClass = "fas fa-wheelchair";
+                            }
+                            else if (lowerAmenity.Contains("spa") || lowerAmenity.Contains("massage") || lowerAmenity.Contains("sauna") || lowerAmenity.Contains("wellness"))
+                            {
+                                iconClass = "fas fa-spa";
+                            }
+                            else if (lowerAmenity.Contains("room service"))
+                            {
+                                iconClass = "fas fa-bell-concierge";
+                            }
+                            else if (lowerAmenity.Contains("wifi") || lowerAmenity.Contains("wi-fi") || lowerAmenity.Contains("internet"))
+                            {
+                                iconClass = "fas fa-wifi";
+                            }
+                            else if (lowerAmenity.Contains("restaurant") || lowerAmenity.Contains("dining") || lowerAmenity.Contains("food"))
+                            {
+                                iconClass = "fas fa-utensils";
+                            }
+                            else if (lowerAmenity.Contains("pet friendly") || lowerAmenity.Contains("pets allowed"))
+                            {
+                                iconClass = "fas fa-dog";
+                            }
+                            else if (lowerAmenity.Contains("family rooms") || lowerAmenity.Contains("family accommodation"))
+                            {
+                                iconClass = "fa-solid fa-people-roof";
+                            }
+                            else if (lowerAmenity.Contains("parking") || lowerAmenity.Contains("car park"))
+                            {
+                                iconClass = "fas fa-parking";
+                            }
+                            else if (lowerAmenity.Contains("bar") || lowerAmenity.Contains("lounge"))
+                            {
+                                iconClass = "fas fa-cocktail";
+                            }
+                            else if (lowerAmenity.Contains("shuttle service") || lowerAmenity.Contains("transportation"))
+                            {
+                                iconClass = "fas fa-bus";
+                            }
+                            else if (lowerAmenity.Contains("airport"))
+                            {
+                                iconClass = "fas fa-plane";
+                            }
+                            else if (lowerAmenity.Contains("air conditioning") || lowerAmenity.Contains("ac"))
+                            {
+                                iconClass = "fas fa-snowflake";
+                            }
+                            else if (lowerAmenity.Contains("24-hour front desk") || lowerAmenity.Contains("reception"))
+                            {
+                                iconClass = "fas fa-concierge-bell";
+                            }
+                            else if (lowerAmenity.Contains("tea") || lowerAmenity.Contains("coffee"))
+                            {
+                                iconClass = "fas fa-mug-hot";
+                            }
+                            else if (lowerAmenity.Contains("laundry") || lowerAmenity.Contains("ironing"))
+                            {
+                                iconClass = "fas fa-washer";
+                            }
+                            else if (lowerAmenity.Contains("meeting") || lowerAmenity.Contains("conference"))
+                            {
+                                iconClass = "fas fa-handshake";
+                            }
+                            else if (lowerAmenity.Contains("elevator") || lowerAmenity.Contains("lift"))
+                            {
+                                iconClass = "fas fa-elevator";
+                            }
+                            else if (lowerAmenity.Contains("luggage") || lowerAmenity.Contains("storage"))
+                            {
+                                iconClass = "fas fa-bell-saturday";
+                            }
+                            else if (lowerAmenity.Contains("children") || lowerAmenity.Contains("kids"))
+                            {
+                                iconClass = "fas fa-child";
+                            }
+                            else if (lowerAmenity.Contains("smoking allowed") || lowerAmenity.Contains("smoking area"))
+                            {
+                                iconClass = "fas fa-smoking";
+                            }
+                            else if (lowerAmenity.Contains("terrace") || lowerAmenity.Contains("balcony"))
+                            {
+                                iconClass = "fas fa-chair";
+                            }
+                            else if (lowerAmenity.Contains("lake view"))
+                            {
+                                iconClass = "fas fa-water";
+                            }
+                            else if (lowerAmenity.Contains("sea view") || lowerAmenity.Contains("ocean view"))
+                            {
+                                iconClass = "fas fa-water";
+                            }
+                            else if (lowerAmenity.Contains("mountain view"))
+                            {
+                                iconClass = "fas fa-mountain";
+                            }
+                            else if (lowerAmenity.Contains("safety deposit box") || lowerAmenity.Contains("safe"))
+                            {
+                                iconClass = "fas fa-shield-alt";
+                            }
+                            else if (lowerAmenity.Contains("television") || lowerAmenity.Contains("tv"))
+                            {
+                                iconClass = "fas fa-tv";
+                            }
+                            else if (lowerAmenity.Contains("refrigerator") || lowerAmenity.Contains("mini bar"))
+                            {
+                                iconClass = "fas fa-wine-bottle";
+                            }
+                            else if (lowerAmenity.Contains("kitchen") || lowerAmenity.Contains("kitchenette"))
+                            {
+                                iconClass = "fas fa-kitchen-set";
+                            }
+                            else if (lowerAmenity.Contains("private bathroom"))
+                            {
+                                iconClass = "fas fa-toilet";
+                            }
+                            else if (lowerAmenity.Contains("heating"))
+                            {
+                                iconClass = "fas fa-fire";
+                            }
+                            else if (lowerAmenity.Contains("soundproof"))
+                            {
+                                iconClass = "fas fa-volume-mute";
+                            }
+                            else if (lowerAmenity.Contains("desk") || lowerAmenity.Contains("workspace"))
+                            {
+                                iconClass = "fas fa-desk";
+                            }
+                            else if (lowerAmenity.Contains("wardrobe") || lowerAmenity.Contains("closet"))
+                            {
+                                iconClass = "fas fa-tshirt";
+                            }
+                            else if (lowerAmenity.Contains("hairdryer"))
+                            {
+                                iconClass = "fas fa-wind";
+                            }
+                            else if (lowerAmenity.Contains("slippers"))
+                            {
+                                iconClass = "fas fa-shoe-prints";
+                            }
+                            else if (lowerAmenity.Contains("wake-up service"))
+                            {
+                                iconClass = "fas fa-bell";
+                            }
+                            else if (lowerAmenity.Contains("interconnected rooms"))
+                            {
+                                iconClass = "fas fa-door-open";
+                            }
+                            else if (lowerAmenity.Contains("hypoallergenic"))
+                            {
+                                iconClass = "fas fa-allergies";
+                            }
+                            else if (lowerAmenity.Contains("city view"))
+                            {
+                                iconClass = "fas fa-city";
+                            }
+                        }
+                        <i class="@iconClass"></i> @amenity
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No amenities are listed for this hotel.</p>
+        }
+    </section>
+
+    <section class="rooms">
+        <h3>Room Photos</h3>
+        @if (Model.Rooms != null && Model.Rooms.Any())
+        {
+            @foreach (var room in Model.Rooms)
+            {
+                <div class="room">
+                    <h4>@room.Name @(room.MaxOccupancy.HasValue ? $" (Capacity: {room.MaxOccupancy} persons)" : "")</h4>
+                    @if (!string.IsNullOrEmpty(room.Description))
+                    {
+                        <p>@room.Description</p>
+                    }
+
+                    @* Room Photos - Assumed to be higher quality by default *@
+                    @if (room.RoomPhotoUrls != null && room.RoomPhotoUrls.Any())
+                    {
+                        <div class="room-photos">
+                            @foreach (var roomPhoto in room.RoomPhotoUrls)
+                            {
+                                <img src="@roomPhoto" alt="Room Photo" loading="lazy" />
+                            }
+                        </div>
+                    }
+
+                    <div class="room-details">
+                        <ul>
+                            @if (room.Facilities != null && room.Facilities.Any())
+                            {
+                                <li>
+                                    <i class="fas fa-info-circle"></i> <strong>Room Facilities:</strong> @string.Join(", ", room.Facilities)
+                                </li>
+                            }
+                            @if (room.BedConfigurations != null && room.BedConfigurations.Any())
+                            {
+                                <li>
+                                    <i class="fas fa-bed"></i> <strong>Bed Configurations:</strong> @string.Join(", ", room.BedConfigurations)
+                                </li>
+                            }
+                            @if (room.MaxOccupancy.HasValue)
+                            {
+                                <li>
+                                    <i class="fas fa-person"></i> <strong>Maximum Occupancy:</strong> @room.MaxOccupancy person(s)
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    @if (room.Price.HasValue && !string.IsNullOrEmpty(room.Currency))
+                    {
+                        <div class="room-price">
+                            @room.Price.Value.ToString("N2") @room.Currency <small>(Total Price)</small>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <p>No room options are currently available for this hotel.</p>
+        }
+    </section>
+
+    @* Guest Reviews (If you have a Reviews list in your ViewModel, you can add this section) *@
+
+    @* Location Map *@
+    @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+    {
+        <section class="map">
+            <h3>Location</h3>
+            <div id="map" style="width: 100%; height: 400px;"></div>
+        </section>
+    }
+</div>
+
+@* For Swiper JS *@
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Swiper for Hotel General Photo Gallery
+        if (document.querySelector('.photo-gallery .swiper-container')) {
+            var hotelSwiper = new Swiper('.photo-gallery .swiper-container', {
+                pagination: {
+                    el: '.photo-gallery .swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.photo-gallery .swiper-button-next',
+                    prevEl: '.photo-gallery .swiper-button-prev',
+                },
+                loop: true,
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                },
+                speed: 800,
+                spaceBetween: 10
+            });
+        }
+
+        // *** OpenStreetMap (with Leaflet.js) Integration ***
+        if (document.getElementById('map') && @(Model.Latitude.HasValue.ToString().ToLower()) && @(Model.Longitude.HasValue.ToString().ToLower())) {
+            var hotelLat = @Model.Latitude.Value.ToString(CultureInfo.InvariantCulture);
+            var hotelLng = @Model.Longitude.Value.ToString(CultureInfo.InvariantCulture);
+            var hotelName = '@Html.Raw(Model.Name)';
+
+            var map = L.map('map').setView([hotelLat, hotelLng], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            L.marker([hotelLat, hotelLng])
+                .addTo(map)
+                .bindPopup(hotelName)
+                .openPopup();
+        }
+    });
+</script>
